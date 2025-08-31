@@ -65,6 +65,9 @@ render(list);
 
 ```javascript
 function mousedown(e) {
+  if (e.type === "touchend") {
+    e = e.changedTouches[0]
+  }
   if (e.target.className.includes("item")) {
     current = +e.target.innerHTML;
     dragItem = addDragEvent(e.target, e);
@@ -101,6 +104,9 @@ function mousemove(e) {
 
 ```javascript
 function mouseup(e) {
+  if (e.type === "touchend") {
+    e = e.changedTouches[0]
+  }
   // 移除事件监听
   document.removeEventListener("mousemove", mousemove);
   document.removeEventListener("mouseup", mouseup);
@@ -171,3 +177,4 @@ function render(list) {
 4. 实现图片拼图模式，使用图片替代数字
 5. 添加音效和视觉反馈，增强游戏体验
 6. 实现本地存储功能，保存游戏进度
+
