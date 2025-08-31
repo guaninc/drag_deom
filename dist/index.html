@@ -95,6 +95,8 @@
         }
         document.removeEventListener("mousemove", mousemove)
         document.removeEventListener("mouseup", mouseup)
+        document.removeEventListener("touchmove", mousemove)
+        document.removeEventListener("touchend", mouseup)
         if (dragItem) {
           container.removeChild(dragItem)
           dragItem = null
