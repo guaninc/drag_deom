@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>Document</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background-color: #ccc;
+      }
+      .view {
+        background-color: #f1f2f3;
+      }
+      .container {
+        margin: 0 auto;
+        width: 80vmin;
+        height: 80vmin;
+        background-color: transparent;
+        align-items: center;
+        justify-items: center;
+        display: grid;
+        gap: 20px;
+        grid-template-columns: repeat(4, 1fr);
+        padding: 20px;
+        .item {
+          background-color: royalblue;
+          border-radius: 10px;
+          border-radius: 25px;
+          width: 100%;
+          aspect-ratio: 1/1;
+          display: flex;
+          color: #fff;
+          font-style: 25px;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.3s ease;
+          user-select: none;
+        }
+      }
+      .flash {
+        border: 1px solid rgb(251, 251, 165);
+      }
+      .item {
+        view-transition-name: var(--i);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="view">
+      <div class="container"></div>
+    </div>
+
+    <script>
+      const container = document.querySelector(".container")
+      let list = new Array(16).fill(0).map((item, index) => index + 1)
+      let dragItem = null
+      let current = null
+      container.addEventListener("mousedown", mousedown)
+      container.addEventListener("touchstart", mousedown)
+      function mousedown(e) {
+        if (e.target.className.includes("item")) {
+          // 添加拖拽元素(透明度0.8)
+          current = +e.target.innerHTML
+          dragItem = addDragEvent(e.target, e)
+          container.appendChild(dragItem)
+          // 监听鼠标移动和鼠标抬起事件(模拟拖拽)
+          document.addEventListener("mousemove", mousemove)
+          document.addEventListener("touchmove", mousemove)
+          document.addEventListener("mouseup", mouseup)
+          document.addEventListener("touchend", mouseup)
+        }
+      }
+
+      function mousemove(e) {
+        if (e.type === "touchmove") {
+          e = e.touches[0]
+        }
+        if (dragItem) {
+          dragItem.style.left = e.clientX - dragItem.offsetWidth / 2 + "px"
+          dragItem.style.top = e.clientY - dragItem.offsetHeight / 2 + "px"
+        }
+      }
+
+      function mouseup(e) {
+        if (e.type === "touchend") {
+          e = e.changedTouches[0]
+        }
+        document.removeEventListener("mousemove", mousemove)
+        document.removeEventListener("mouseup", mouseup)
+        document.removeEventListener("touchmove", mousemove)
+        document.removeEventListener("touchend", mouseup)
+        if (dragItem) {
+          container.removeChild(dragItem)
+          dragItem = null
+          let targetDom = getElementByPoint(e.clientX, e.clientY, "item")
+          if (targetDom) {
+            let target = +targetDom.innerHTML
+            let currentLength = list.indexOf(current)
+            let targetLength = list.indexOf(target)
+            // {
+            //   // 交换位置(会推动其他元素)
+            //   list.splice(currentLength, 1)
+            //   list.splice(targetLength, 0, current)
+            // }
+            {
+              // 交换位置(不会推动其他元素)
+              list[currentLength] = target
+              list[targetLength] = current
+            }
+            render(list)
+          }
+        }
+      }
+
+      function render(list) {
+        document.startViewTransition(() => {
+          container.innerHTML = list
+            .map(
+              (item) => `<div class="item"style="--i: a${item}" >${item}</div>`
+            )
+            .join("")
+        })
+      }
+      render(list)
+
+      // 获取当前鼠标位置下的元素
+      function getElementByPoint(x, y, className) {
+        const elements = document.elementsFromPoint(x, y)
+        for (const el of elements) {
+          if (el.className.includes(className)) {
+            return el
+          }
+        }
+        return null
+      }
+
+      // 添加拖拽元素
+      function addDragEvent(dom, e) {
+        if (e.type === "touchstart") {
+          e = e.touches[0]
+        }
+        let dragItem = null
+        dragItem = dom.cloneNode(true)
+        dragItem.style.opacity = 0.8
+        dragItem.style.position = "absolute"
+        dragItem.style.zIndex = 999
+        dragItem.style.left = e.clientX - e.target.offsetWidth / 2 + "px"
+        dragItem.style.top = e.clientY - e.target.offsetHeight / 2 + "px"
+        dragItem.style.width = e.target.offsetWidth + "px"
+        dragItem.style.height = e.target.offsetHeight + "px"
+        dragItem.style.pointerEvents = "none"
+        dragItem.style.transition = "none"
+        return dragItem
+      }
+    </script>
+  </body>
+</html>
